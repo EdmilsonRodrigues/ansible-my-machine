@@ -1,0 +1,57 @@
+- name: "Install basic packages"
+  hosts: all
+  vars_files: variables.yaml
+  tasks:
+    - name: "Upgrade existing packages"
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: true
+        cache_valid_time: 3600
+    - name: "Install basic packages"
+      ansible.builtin.apt:
+        name: "{{ base_packages }}"
+        state: present
+        update_cache: true
+    - name: "Install snap packages"
+      community.general.snap:
+        name: "{{ item.name }}"
+        state: present
+        classic: "{{ item.classic }}"
+        channel: "{{ item.channel if item.channel else 'latest/stable' }}"
+      loop: "{{ snap_packages }}"
+
+- name: "Configure virtualization services"
+  hosts: all
+  vars_files: variables.yaml
+  tasks:
+    - name: "Add microk8s profile to lxd"
+      community.general.lxd_profile:
+        name: microk8s
+        config: "{{ microk8s_profile_config }}"
+        state: present
+    - name: "Create Istio System Namespaces"
+      kubernetes.core.k8s:
+        api_version: v1
+        kind: Namespace
+        name: istio-system
+        state: present
+    - name: "Create Istio Ingress Namespace"
+      kubernetes.core.k8s:
+        api_version: v1
+        kind: Namespace
+        name: istio-ingress
+        state: present
+    - name: "Add Istio Repo to Helm"
+      community.general.helm:
+        repo: istio
+        state: present
+        update_cache: true
+        repo_url: "https://istio-release.storage.googleapis.com/charts"
+    - name: "Install Istio"
+      community.general.helm:
+        name: istio-base
+        chart: istio/base
+        namespace: istio-system
+        state: present
+        values:
+          defaultRevision: default

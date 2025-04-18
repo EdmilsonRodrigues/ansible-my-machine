@@ -1,0 +1,37 @@
+---
+home_dir: /home/familia
+microk8s_profile_config: "/home/familia/Documents/Study/Kubernetes/microk8s.profile"
+base_packages:
+  - nvim
+  - git
+  - python3
+  - gh
+  - curl
+  - htop
+  - wget
+  - neovim
+  - vim
+  - audacity
+  - gimp
+  - bison
+  - make
+  - pipx
+  - snap
+  - openjdk-21-jdk
+  - dpkg-dev
+  - ssh
+  - openssl
+snap_packages:
+  - name: microk8s
+    channels: 1.32-strict/stable
+    classic: false
+  - name: juju
+    classic: true
+  - name: lxd
+    classic: true
+  - name: helm
+    classic: true
+  - name: docker
+    classic: true
+  - name: multipass
+    classic: true
